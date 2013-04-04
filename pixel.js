@@ -13,16 +13,15 @@ if (Meteor.isClient) {
   };
 
   Template.cursorconf.events({
-    'change select#size' : function(evt) {
+    'change #size' : function(evt) {
       Screen.update(Session.get("cursor"), {$set: {size: evt.target.value}});
     },
-    'change select#currentColor': function(evt) {
+    'change #currentColor': function(evt) {
       var color = evt.target.value;
       if (color == "random"){
         color = randomColor();
       }
       Screen.update(Session.get("cursor"), {$set: {color: color}});
-      console.log("new color: ",color);
     }
   });
 

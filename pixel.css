@@ -1,4 +1,17 @@
 /* CSS declarations go here */
-body{
+.screen {
   cursor: none;
+  width: 95%;
+  height: 100%;
+}
+.size, .color {
+  cursor: pointer;
+}
+.size{
+
+  margin: 1px;
+}
+.pallete{
+  position: absolute;
+  right: 0;
 }

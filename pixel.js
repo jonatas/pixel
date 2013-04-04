@@ -1,10 +1,8 @@
-Screen = new Meteor.Collection("screen");
+Cursor = new Meteor.Collection("cursors");
+Whiteboard = new Meteor.Collection("whiteboard");
 
 function now() {
   return new Date().getTime();
-}
-function randomColor(){
-  return '#'+Math.floor(Math.random()*16777215).toString(16);
 }
 
 PalleteColors = [];
@@ -19,17 +17,28 @@ for (i = 0; i<colors.length;i++){
 
 function createNewCursor(coordinates){
    Session.set("cursor",
-     Screen.insert({
+     Cursor.insert({
        userId: Session.get("userId"),
-        color: Session.get("color") || "black",
-         size: Session.get("size")||4, 
+        color: Session.get("color"),
+         size: Session.get("size"),
            x: coordinates[0],
            y: coordinates[1]}));
 }
+function click(coordinates){
+  Whiteboard.insert({
+     color: Session.get("color"),
+      size: Session.get("size"),
+         x: coordinates[0],
+         y: coordinates[1]});
+}
 if (Meteor.isClient) {
-  Meteor.subscribe('screen');
+  Meteor.subscribe('cursors');
+  Meteor.subscribe('whiteboard');
   Template.screen.cursors = function() {
-    return Screen.find();
+    return Cursor.find();
+  };
+  Template.screen.draws = function() {
+    return Whiteboard.find();
   };
 
   Template.pallete.colors = function(){
@@ -43,7 +52,7 @@ if (Meteor.isClient) {
       console.log("click .color");
       var color = evt.target.attributes.color.nodeValue;
       Session.set("color",color);
-      Screen.update(Session.get("cursor"), {$set: {color: color}});
+      Cursor.update(Session.get("cursor"), {$set: {color: color}});
     }
   });
   Template.sizes.events({
@@ -52,28 +61,37 @@ if (Meteor.isClient) {
       var size = evt.target.attributes.size.nodeValue;
       console.log('new size is', size);
       Session.set("size",size);
-      Screen.update(Session.get("cursor"), {$set: {size: size}});
+      Cursor.update(Session.get("cursor"), {$set: {size: size}});
     }
   });
 
   Meteor.startup(function () {
-     Session.set('color', randomColor());
+     Session.set('color', PalleteColors[0].color);
      Session.set('userId', Meteor.uuid());
-     Session.set("size",8);
+     Session.set("size",24);
      var coordinates = [0,0];
+     var configuringPointer = false;
      createNewCursor(coordinates);
-     d3.select('.screen').on('mousemove', function() {
-       coordinates = d3.mouse(this);
-       Screen.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
+     d3.select('html').on('mousemove', function() {
+       if (! configuringPointer) {
+         coordinates = d3.mouse(this);
+         Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
+       }
+     });
+     d3.select('.conf').on('mouseover', function() {
+       configuringPointer = true;
+     });
+     d3.select('.conf').on('mouseout', function() {
+       configuringPointer = false;
      });
      d3.select('.screen').on('click', function(){
-       createNewCursor(coordinates);
+       click(coordinates);
      });
   });
 }
 if (Meteor.isServer) {
   Meteor.publish('screen', function () {
-    return Screen.find();
+    return Cursor.find();
   });
   Meteor.startup(function () {
     // code to run on server at startup

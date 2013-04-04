@@ -7,3 +7,8 @@ autopublish
 insecure
 preserve-inputs
 d3
+accounts-base
+accounts-facebook
+accounts-google
+accounts-twitter
+accounts-ui

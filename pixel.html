@@ -5,10 +5,13 @@
   <div class="conf">
   {{> pallete }}
   {{> sizes }}
+  {{> whiteboards}}
   </div>
-  <div class="screen">
-    {{> screen }}
-  </div>
+  {{#if loading}}
+    <div class="loading">Loading...</div>
+  {{else}}
+    <div class="screen"> {{> screen }}</div>
+  {{/if}}
 </body>
 <template name="screen">
   {{#each cursors}}
@@ -33,4 +36,12 @@
   {{#each sizes}}
   <div class="size" size={{size}} style="width:{{size}}px;background-color: black; height: {{size}}px; float:left;" ></div>
   {{/each}}
+</template>
+<template name="whiteboards">
+<div class="whiteboards">
+  {{#each mine}}
+  <div class="whiteboard-name">{{name}}</div>
+  {{/each}}
+  <input type="button" value="Add"/>
+</div>
 </template>

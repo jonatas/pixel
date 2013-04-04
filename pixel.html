@@ -3,11 +3,35 @@
 </head>
 
 <body>
-  {{> hello}}
+  {{> cursorconf}}
+  {{> screen }}
 </body>
 
-<template name="hello">
-  <h1>Hello World!</h1>
-  {{greeting}}
-  <input type="button" value="Click" />
+<template name="screen">
+  {{#each cursors}}
+    {{> cursor}}
+  {{/each}}
+</template>
+<template name="cursor">
+<div id="cursor_{{_id}}" style="width:{{size}}px;background-color: {{color}}; height: {{size}}px;position:absolute; top: {{y}}px; left: {{x}}px;">
+  
+</div>
+</template>
+<template name="cursorconf">
+<div class="settings">
+Size:<select id="size">
+  <option>1</option>
+  <option>2</option>
+  <option>4</option>
+  <option>8</option>
+  <option>16</option>
+</select>
+Color: <select id="currentColor">
+  <option>red</option>
+  <option>green</option>
+  <option>blue</option>
+  <option>yellow</option>
+  <option>random</option>
+</select>
+</div>
 </template>

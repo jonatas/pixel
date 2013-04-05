@@ -8,20 +8,20 @@
   cursor: pointer;
 }
 .whiteboards, .conf {
-
   clear:both;
 }
 .whiteboards{
   position: absolute;
-  top:0;
+  top:300px;
   right: 0;
   border: 1px solid gray ;
   background-color: lightgray;
   padding: 10px;
 }
 .size{
-
-  margin: 1px;
+  margin: 5px;
+  display: block;
+  clear:both;
 }
 .pallete{
   position: absolute;
@@ -32,4 +32,30 @@
   position: absolute;
   top: 50%;
   left: 50%;
+}
+.conf{
+  width: 40px;
+  padding: 5px;
+  border: 1px solid gray ;
+  background-color: lightgray;
+  z-index: 2;
+}
+.color{
+  text-indent: -900px;
+  width: 32px;
+  height: 32px;
+}
+.loginButtons{
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.cursor {
+  position: absolute;
+  opacity: 0.7;
+  z-index: 1;
+}
+.pointer {
+  position: absolute;
+  z-index: 1;
 }

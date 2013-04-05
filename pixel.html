@@ -1,10 +1,15 @@
 <head>
   <title>pixel</title>
+  <script type="text/javascript" src="http://jscolor.com/jscolor/jscolor.js"></script>
+
 </head>
 <body>
   <div class="conf">
   {{> pallete }}
   {{> sizes }}
+  <div class="loginButtons">
+    {{loginButtons align="right"}}
+  </div>
   {{> whiteboards}}
   </div>
   {{#if loading}}
@@ -22,19 +27,17 @@
   {{/each}}
 </template>
 <template name="pallete">
-  {{#each colors}}
-  <div class="color" color={{color}} style="width:{{size}}px;background-color: {{color}}; height: {{size}}px; float:left;" ></div>
-  {{/each}}
+<input class="color">
 </template>
 <template name="cursor">
-<div id="cursor_{{_id}}" style="opacity: 0.7;width:{{size}}px;background-color: {{color}}; height: {{size}}px;position:absolute; top: {{y}}px; left: {{x}}px;" />
+<div class="cursor" id="cursor_{{_id}}" style="width:{{size}}px;background-color: {{color}}; height: {{size}}px; top: {{y}}px; left: {{x}}px;" />
 </template>
 <template name="draw">
 <div style="width:{{size}}px;background-color: {{color}}; height: {{size}}px;position:absolute; top: {{y}}px; left: {{x}}px;z-index:-1;" />
 </template>
 <template name="sizes">
   {{#each sizes}}
-  <div class="size" size={{size}} style="width:{{size}}px;background-color: black; height: {{size}}px; float:left;" ></div>
+  <div class="size" size={{size}} style="width:{{size}}px;background-color: black; height: {{size}}px;" ></div>
   {{/each}}
 </template>
 <template name="whiteboards">

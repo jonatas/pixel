@@ -4,14 +4,13 @@ Whiteboards = new Meteor.Collection("whiteboards");
 
 var coordinates = [0,0];
 if (Meteor.isClient) {
-  PalleteColors = [];
   PalleteSizes = [];
+  for (i = 0; i< 6;i++){
+    PalleteSizes[i] = { size: 2+Math.pow(2,i)};
+  }
 
-  colors = "#3182bd #6baed6 #9ecae1 #c6dbef #e6550d #fd8d3c #fdae6b #fdd0a2 #31a354 #74c476 #a1d99b #c7e9c0 #756bb1 #9e9ac8 #bcbddc #dadaeb #636363 #969696 #bdbdbd #d9d9d9".split(" ");
-  // thanks colors from # d3.scale.category20c()
-  for (i = 0; i<colors.length;i++){
-    PalleteColors[i] = {color: colors[i], size: 25};
-    PalleteSizes[i] = { size: i*2};
+  function randomColor(){
+    return Math.floor(Math.random()*16777215).toString(16);
   }
 
   function findOrCreateWhiteboardId(){
@@ -55,6 +54,11 @@ if (Meteor.isClient) {
     return whiteboard_id;
   }
 
+  function setColorForCursor(color)
+  {
+    Session.set("color",color);
+    Cursor.update(Session.get("cursor"), {$set: {color: color}});
+  }
   function setWhiteboardId(id){
      Session.set("whiteboard_id", id);
      sel = currentWhiteBoard();
@@ -105,20 +109,23 @@ if (Meteor.isClient) {
     return whiteboardHandle && !whiteboardHandle.ready();
   };
 
-  Template.pallete.colors = function(){
-    return PalleteColors;
-  }
   Template.sizes.sizes = function(){
     return PalleteSizes;
   }
   Template.pallete.events({
-    'click .color' : function(evt){
-      console.log("click .color");
-      var color = evt.target.attributes.color.nodeValue;
-      Session.set("color",color);
-      Cursor.update(Session.get("cursor"), {$set: {color: color}});
+    'change .color' : function(evt){
+      var color = '#'+evt.target.value;
+      setColorForCursor(color);
     }
   });
+
+  Template.pallete.rendered = function(){
+    var color = randomColor();
+    $('input.color').val(color);
+    color = '#'+color;
+    $('input.color').css({'background-color': color});
+    setColorForCursor(color);
+  };
   Template.sizes.events({
     'click .size' : function(evt) {
       console.log('size changed', evt);
@@ -162,7 +169,6 @@ if (Meteor.isClient) {
   }
 
   Meteor.startup(function () {
-    Session.set('color', PalleteColors[0].color);
     Session.set('user_id', Meteor.uuid());
     Session.set("size",24);
     var configuringPointer = false;

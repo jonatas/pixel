@@ -39,6 +39,7 @@
   border: 1px solid gray ;
   background-color: lightgray;
   z-index: 2;
+  position: absolute;
 }
 .color{
   text-indent: -900px;

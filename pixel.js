@@ -52,7 +52,6 @@ if (Meteor.isClient) {
     return whiteboard_id;
   }
   Deps.autorun(function(){
-
      Meteor.subscribe('whiteboards', Session.get("user_id"));
      Meteor.subscribe('cursors', Session.get("whiteboard_id"));
      Meteor.subscribe('pixels', Session.get("whiteboard_id"));
@@ -62,7 +61,9 @@ if (Meteor.isClient) {
       user_id = Session.get("user_id");
       if (user_id != Meteor.userId()){
         Session.set("user_id", Meteor.userId());
-        Cursor.update(Session.get("cursor"), {$set: {user_id: Meteor.userId()}});
+        Session.set("name", Meteor.users.find(Meteor.userId().profile.name));
+        Cursor.update(Session.get("cursor"),
+          {$set: {user_id: Meteor.userId(), name: Session.get("name")}});
         Whiteboard.find({user_id: user_id}).forEach(function(whiteboard){
           Whiteboard.update(whiteboard._id, {$set: {user_id: Meteor.userId()}});
         });
@@ -95,6 +96,7 @@ if (Meteor.isClient) {
         Cursor.insert({
           whiteboard_id: Session.get("whiteboard_id"),
         user_id: Session.get("user_id"),
+        name: (Session.get("name") || "Anonymous"),
         color: Session.get("color"),
         size: Session.get("size"),
         x: coordinates[0],
@@ -118,11 +120,7 @@ if (Meteor.isClient) {
     return Pixel.find();
   };
   Template.painters.painters = function() {
-    return Cursor.find(
-        {last_click_at: {$gt: new Date().getTime() - 10000}}).map(function(cursor){
-          user = Meteor.users.findOne(cursor.user_id);
-          return user.profile;
-        });
+    return Cursor.find( {last_click_at: {$gt: new Date().getTime() - 10000}});
   };
   Template.whiteboards.mine = function(){
     return Whiteboard.find( {$or: [

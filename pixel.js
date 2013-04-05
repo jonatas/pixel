@@ -1,6 +1,6 @@
 Cursor = new Meteor.Collection("cursors");
-Whiteboard = new Meteor.Collection("whiteboard");
-Whiteboards = new Meteor.Collection("whiteboards");
+Pixel = new Meteor.Collection("pixels");
+Whiteboard = new Meteor.Collection("whiteboards");
 
 var coordinates = [0,0];
 if (Meteor.isClient) {
@@ -14,7 +14,7 @@ if (Meteor.isClient) {
   }
 
   function findOrCreateWhiteboardId(){
-    if (Whiteboards.find().fetch().length == 0){
+    if (Whiteboard.find().fetch().length == 0){
        return ;
     }
     var d = new Date()
@@ -24,23 +24,26 @@ if (Meteor.isClient) {
        month: d.getMonth()+1,
         year: d.getFullYear(),
      user_id: null };
-    var whiteboard = Whiteboards.findOne(where);
+    var whiteboard = Whiteboard.findOne(where);
     var whiteboard_id;
-    console.log("find One ", where, whiteboard);
     if (whiteboard != null)
     {
       whiteboard_id = whiteboard._id;
     } else
     {
-      whiteboard_id = Whiteboards.insert(where);
+      whiteboard_id = Whiteboard.insert(where);
     }
     setWhiteboardId(whiteboard_id);
     Session.set("public_whiteboard_id", whiteboard_id);
     return whiteboard_id;
   }
+  function userId(){
+  id = Session.get("user_id");
+  return id;
+  }
   function findOrCreateWhiteboardByName(name){
     var fields= {name: name, user_id: Session.get("user_id")};
-    var whiteboard =  Whiteboards.findOne(fields);
+    var whiteboard =  Whiteboard.findOne(fields);
     if (whiteboard == null)
     {
       var d = new Date()
@@ -48,11 +51,27 @@ if (Meteor.isClient) {
       fields.month = d.getMonth()+1;
       fields.year = d.getFullYear();
       console.log('Inserindo whiteboards', fields);
-      whiteboard_id = Whiteboards.insert(fields);
+      whiteboard_id = Whiteboard.insert(fields);
     } else whiteboard_id = whiteboard._id;
     setWhiteboardId(whiteboard_id);
     return whiteboard_id;
   }
+  Meteor.autorun(function () {
+    if (Meteor.userId()) {
+      user_id = Session.get("user_id");
+      if (user_id != Meteor.userId()){
+        Session.set("user_id", Meteor.userId());
+        Cursor.update(Session.get("cursor"), {$set: {user_id: Meteor.userId()}});
+        Whiteboard.find({user_id: user_id}).forEach(function(whiteboard){
+          Whiteboard.update(whiteboard._id, {$set: {user_id: Meteor.userId()}});
+        });
+        Pixel.find({user_id: user_id}).forEach(function(pixel){
+          Pixel.update(pixel._id, {$set: {user_id: Meteor.userId()}});
+        });
+      }
+    } else {
+    }
+  });
 
   function setColorForCursor(color)
   {
@@ -78,10 +97,11 @@ if (Meteor.isClient) {
         y: 0}));
   }
   function click(coordinates){
-    Whiteboard.insert({
+    Pixel.insert({
       whiteboard_id: Session.get("whiteboard_id"),
-    color: Session.get("color"),
-    size: Session.get("size"),
+              color: Session.get("color"),
+               size: Session.get("size"),
+            user_id: Session.get("user_id"),
     x: coordinates[0],
     y: coordinates[1]});
     Deps.flush();
@@ -102,7 +122,7 @@ if (Meteor.isClient) {
     return sel;
   }
   Template.screen.draws = function() {
-    return Whiteboard.find(currentWhiteBoard());
+    return Pixel.find(currentWhiteBoard());
   };
 
   Template.screen.loading = function () {
@@ -136,7 +156,7 @@ if (Meteor.isClient) {
     }
   });
   Template.whiteboards.mine = function(){
-    return Whiteboards.find(
+    return Whiteboard.find(
         {$or: [
           {user_id: Session.get("user_id")},
           {_id: Session.get("public_whiteboard_id")}

@@ -33,8 +33,8 @@ if (Meteor.isClient) {
     {
       whiteboard_id = Whiteboard.insert(where);
     }
-    setWhiteboardId(whiteboard_id);
     Session.set("public_whiteboard_id", whiteboard_id);
+    setWhiteboardId(whiteboard_id);
     return whiteboard_id;
   }
   function findOrCreateWhiteboardByName(name){

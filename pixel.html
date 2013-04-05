@@ -16,6 +16,7 @@
   {{else}}
     <div class="screen"> {{> screen }}</div>
   {{/if}}
+  {{> painters }}
 </body>
 <template name="screen">
   {{#each cursors}}
@@ -45,5 +46,13 @@
   <div class="whiteboard-name">{{name}}</div>
   {{/each}}
   <input type="button" value="Add"/>
+</div>
+</template>
+<template name="painters">
+<div class="painters">
+  Painters
+  {{#each painters}}
+  <li class="painter-name">{{name}}</li>
+  {{/each}}
 </div>
 </template>

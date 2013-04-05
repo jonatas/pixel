@@ -85,8 +85,11 @@ if (Meteor.isClient) {
      createNewCursor([0,0]);
   }
   function createNewCursor(coordinates){
-    if (Session.get("cursor"))
+    if (Session.get("cursor")){
       Cursor.remove(Session.get("cursor"));
+    }
+    if (coordinates == null)
+      coordinates = [0,0]
 
     Session.set("cursor",
         Cursor.insert({
@@ -94,8 +97,8 @@ if (Meteor.isClient) {
         user_id: Session.get("user_id"),
         color: Session.get("color"),
         size: Session.get("size"),
-        x: 0,
-        y: 0}));
+        x: coordinates[0],
+        y: coordinates[1]}));
   }
   function click(coordinates){
     Pixel.insert({
@@ -105,13 +108,23 @@ if (Meteor.isClient) {
             user_id: Session.get("user_id"),
     x: coordinates[0],
     y: coordinates[1]});
+    update = { last_click_at: new Date().getTime()};
+    console.log("update:: ", update);
+    Cursor.update(Session.get("cursor"), {$set: update}); 
   }
-
   Template.screen.cursors = function() {
     return Cursor.find();
   }
   Template.screen.draws = function() {
     return Pixel.find();
+  };
+  Template.painters.painters = function() {
+    return Cursor.find(
+        {last_click_at: {$gt: new Date().getTime() - 10000}}).map(function(cursor){
+          user = Meteor.users.find(cursor.user_id);
+          console.log(user);
+          return user.profile;
+        });
   };
   Template.whiteboards.mine = function(){
     return Whiteboard.find( {$or: [
@@ -169,14 +182,19 @@ if (Meteor.isClient) {
          })();
     }
   }
+  Meteor.setInterval(function(){
+    Cursor.find({last_click_at: {$lt: new Date().getTime() - 60000}}).forEach(function(cursor){
+      Cursor.remove(cursor._id);
+      });
+  }, 10000);
 
   Meteor.startup(function () {
     Session.set('user_id', Meteor.uuid());
     Session.set("size", 32);
-    var configuringPointer = false;
-    createNewCursor(coordinates);
     d3.select('html').on('mousemove', function() {
       coordinates = d3.mouse(this);
+      if (! Session.get("cursor")|| !Cursor.findOne(Session.get("cursor")))
+        createNewCursor(coordinates);
       Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
     });
     d3.select('.screen').on('click', function(){

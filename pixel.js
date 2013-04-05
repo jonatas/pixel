@@ -61,7 +61,10 @@ if (Meteor.isClient) {
       user_id = Session.get("user_id");
       if (user_id != Meteor.userId()){
         Session.set("user_id", Meteor.userId());
-        Session.set("name", Meteor.users.findOne(Meteor.userId()).profile.name);
+        if (user=Meteor.users.findOne(Meteor.userId()))
+         {
+          Session.set("name",user.profile.name);
+        }
         Cursor.update(Session.get("cursor"),
           {$set: {user_id: Meteor.userId(), name: Session.get("name")}});
         Whiteboard.find({user_id: user_id}).forEach(function(whiteboard){

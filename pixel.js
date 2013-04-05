@@ -37,10 +37,6 @@ if (Meteor.isClient) {
     Session.set("public_whiteboard_id", whiteboard_id);
     return whiteboard_id;
   }
-  function userId(){
-  id = Session.get("user_id");
-  return id;
-  }
   function findOrCreateWhiteboardByName(name){
     var fields= {name: name, user_id: Session.get("user_id")};
     var whiteboard =  Whiteboard.findOne(fields);
@@ -50,12 +46,16 @@ if (Meteor.isClient) {
       fields.day = d.getDay();
       fields.month = d.getMonth()+1;
       fields.year = d.getFullYear();
-      console.log('Inserindo whiteboards', fields);
       whiteboard_id = Whiteboard.insert(fields);
     } else whiteboard_id = whiteboard._id;
     setWhiteboardId(whiteboard_id);
     return whiteboard_id;
   }
+  Deps.autorun(function(){
+     Meteor.subscribe('whiteboards', Session.get("user_id"));
+     Meteor.subscribe('cursors', Session.get("whiteboard_id"));
+     Meteor.subscribe('pixels', Session.get("whiteboard_id"));
+  });
   Meteor.autorun(function () {
     if (Meteor.userId()) {
       user_id = Session.get("user_id");
@@ -72,7 +72,6 @@ if (Meteor.isClient) {
     } else {
     }
   });
-
   function setColorForCursor(color)
   {
     Session.set("color",color);
@@ -80,13 +79,12 @@ if (Meteor.isClient) {
   }
   function setWhiteboardId(id){
      Session.set("whiteboard_id", id);
-     sel = currentWhiteBoard();
-     createNewCursor();
-     Meteor.subscribe('cursors', sel);
-     Meteor.subscribe('whiteboards');
-     Meteor.subscribe('whiteboard', sel);
+     createNewCursor([0,0]);
   }
   function createNewCursor(coordinates){
+    if (Session.get("cursor"))
+      Cursor.remove(Session.get("cursor"));
+
     Session.set("cursor",
         Cursor.insert({
           whiteboard_id: Session.get("whiteboard_id"),
@@ -104,31 +102,19 @@ if (Meteor.isClient) {
             user_id: Session.get("user_id"),
     x: coordinates[0],
     y: coordinates[1]});
-    Deps.flush();
   }
 
-  var whiteboardHandle = null;
   Template.screen.cursors = function() {
-    return Cursor.find(currentWhiteBoard());
-  }
-  function currentWhiteBoard()
-  {
-    var sel = {};
-   if (Session.get("whiteboard_id")!=null)
-     sel.whiteboard_id = Session.get("whiteboard_id");
-   else
-     findOrCreateWhiteboardId();
-
-    return sel;
+    return Cursor.find();
   }
   Template.screen.draws = function() {
-    return Pixel.find(currentWhiteBoard());
+    return Pixel.find();
   };
-
-  Template.screen.loading = function () {
-    return whiteboardHandle && !whiteboardHandle.ready();
+  Template.whiteboards.mine = function(){
+    return Whiteboard.find( {$or: [
+          {user_id: Session.get("user_id")},
+          {_id: Session.get("public_whiteboard_id")} ]});
   };
-
   Template.sizes.sizes = function(){
     return PalleteSizes;
   }
@@ -155,13 +141,6 @@ if (Meteor.isClient) {
       Cursor.update(Session.get("cursor"), {$set: {size: size}});
     }
   });
-  Template.whiteboards.mine = function(){
-    return Whiteboard.find(
-        {$or: [
-          {user_id: Session.get("user_id")},
-          {_id: Session.get("public_whiteboard_id")}
-    ]});
-  };
   Template.whiteboards.events(
       {'click input' : function(){
         var name = prompt("Name your whiteboard", "Untitled");
@@ -226,9 +205,16 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  Meteor.publish('screen', function () {
-    return Cursor.find();
+  Meteor.publish('cursors', function (whiteboard_id) {
+    return Cursor.find({whiteboard_id: whiteboard_id});
   });
+  Meteor.publish('whiteboards', function (user_id) {
+    return Whiteboard.find({$or: [{user_id: user_id}, { name: "Public"}]});
+  });
+  Meteor.publish('pixels', function (whiteboard_id) {
+    return Pixel.find({whiteboard_id: whiteboard_id});
+  });
+
   Meteor.startup(function () {
     // code to run on server at startup
   });

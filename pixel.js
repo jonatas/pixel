@@ -109,7 +109,6 @@ if (Meteor.isClient) {
     x: coordinates[0],
     y: coordinates[1]});
     update = { last_click_at: new Date().getTime()};
-    console.log("update:: ", update);
     Cursor.update(Session.get("cursor"), {$set: update}); 
   }
   Template.screen.cursors = function() {
@@ -121,8 +120,7 @@ if (Meteor.isClient) {
   Template.painters.painters = function() {
     return Cursor.find(
         {last_click_at: {$gt: new Date().getTime() - 10000}}).map(function(cursor){
-          user = Meteor.users.find(cursor.user_id);
-          console.log(user);
+          user = Meteor.users.findOne(cursor.user_id);
           return user.profile;
         });
   };
@@ -150,9 +148,7 @@ if (Meteor.isClient) {
   };
   Template.sizes.events({
     'click .size' : function(evt) {
-      console.log('size changed', evt);
       var size = evt.target.attributes.size.nodeValue;
-      console.log('new size is', size);
       Session.set("size",size);
       Cursor.update(Session.get("cursor"), {$set: {size: size}});
     }

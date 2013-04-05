@@ -13,9 +13,9 @@ if (Meteor.isClient) {
     return Math.floor(Math.random()*16777215).toString(16);
   }
 
-  function findOrCreateWhiteboardId(){
+  function findOrCreatePublicWhiteboardId(){
     if (Whiteboard.find().fetch().length == 0){
-       return ;
+       return  ;
     }
     var d = new Date()
     var where = {
@@ -52,6 +52,7 @@ if (Meteor.isClient) {
     return whiteboard_id;
   }
   Deps.autorun(function(){
+
      Meteor.subscribe('whiteboards', Session.get("user_id"));
      Meteor.subscribe('cursors', Session.get("whiteboard_id"));
      Meteor.subscribe('pixels', Session.get("whiteboard_id"));
@@ -70,6 +71,8 @@ if (Meteor.isClient) {
         });
       }
     } else {
+      if (! Session.get("whiteboard_id"))
+        findOrCreatePublicWhiteboardId();
     }
   });
   function setColorForCursor(color)
@@ -169,7 +172,7 @@ if (Meteor.isClient) {
 
   Meteor.startup(function () {
     Session.set('user_id', Meteor.uuid());
-    Session.set("size",24);
+    Session.set("size", 32);
     var configuringPointer = false;
     createNewCursor(coordinates);
     d3.select('html').on('mousemove', function() {
@@ -180,7 +183,7 @@ if (Meteor.isClient) {
       click(coordinates);
     });
 
-     findOrCreateWhiteboardId();
+     findOrCreatePublicWhiteboardId();
   });
   /*
      var PixelRouter = Backbone.Router.extend({

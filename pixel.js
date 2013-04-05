@@ -109,7 +109,6 @@ if (Meteor.isClient) {
     x: coordinates[0],
     y: coordinates[1]});
     update = { last_click_at: new Date().getTime()};
-    console.log("update:: ", update);
     Cursor.update(Session.get("cursor"), {$set: update}); 
   }
   Template.screen.cursors = function() {
@@ -149,9 +148,7 @@ if (Meteor.isClient) {
   };
   Template.sizes.events({
     'click .size' : function(evt) {
-      console.log('size changed', evt);
       var size = evt.target.attributes.size.nodeValue;
-      console.log('new size is', size);
       Session.set("size",size);
       Cursor.update(Session.get("cursor"), {$set: {size: size}});
     }

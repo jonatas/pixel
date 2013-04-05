@@ -174,16 +174,8 @@ if (Meteor.isClient) {
     var configuringPointer = false;
     createNewCursor(coordinates);
     d3.select('html').on('mousemove', function() {
-      if (! configuringPointer) {
-        coordinates = d3.mouse(this);
-        Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
-      }
-    });
-    d3.select('.conf').on('mouseover', function() {
-      configuringPointer = true;
-    });
-    d3.select('.conf').on('mouseout', function() {
-      configuringPointer = false;
+      coordinates = d3.mouse(this);
+      Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
     });
     d3.select('.screen').on('click', function(){
       click(coordinates);

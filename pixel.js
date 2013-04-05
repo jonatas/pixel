@@ -121,8 +121,7 @@ if (Meteor.isClient) {
   Template.painters.painters = function() {
     return Cursor.find(
         {last_click_at: {$gt: new Date().getTime() - 10000}}).map(function(cursor){
-          user = Meteor.users.find(cursor.user_id);
-          console.log(user);
+          user = Meteor.users.findOne(cursor.user_id);
           return user.profile;
         });
   };

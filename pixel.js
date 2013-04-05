@@ -62,11 +62,12 @@ if (Meteor.isClient) {
       if (user_id != Meteor.userId()){
         Session.set("user_id", Meteor.userId());
         if (user=Meteor.users.findOne(Meteor.userId()))
-         {
+        {
           Session.set("name",user.profile.name);
         }
         Cursor.update(Session.get("cursor"),
-          {$set: {user_id: Meteor.userId(), name: Session.get("name")}});
+          {$set: {user_id: Meteor.userId(), 
+                     name: Session.get("name")}});
         Whiteboard.find({user_id: user_id}).forEach(function(whiteboard){
           Whiteboard.update(whiteboard._id, {$set: {user_id: Meteor.userId()}});
         });
@@ -94,12 +95,11 @@ if (Meteor.isClient) {
     }
     if (coordinates == null)
       coordinates = [0,0]
-
     Session.set("cursor",
         Cursor.insert({
           whiteboard_id: Session.get("whiteboard_id"),
         user_id: Session.get("user_id"),
-        name: (Session.get("name") || "Anonymous"),
+        name: Session.get("name"),
         color: Session.get("color"),
         size: Session.get("size"),
         x: coordinates[0],
@@ -113,7 +113,10 @@ if (Meteor.isClient) {
             user_id: Session.get("user_id"),
     x: coordinates[0],
     y: coordinates[1]});
-    update = { last_click_at: new Date().getTime()};
+   if (!Session.get("name") && Meteor.userId())
+     Session.set("name",Meteor.users.findOne(Meteor.userId()).profile.name);
+
+    update = { last_click_at: new Date().getTime(), name: (Session.get("name")||"Anonymous")};
     Cursor.update(Session.get("cursor"), {$set: update}); 
   }
   Template.screen.cursors = function() {

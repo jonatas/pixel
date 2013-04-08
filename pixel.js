@@ -190,6 +190,9 @@ if (Meteor.isClient) {
     Session.set("size", 32);
     d3.select('html').on('mousemove', function() {
       coordinates = d3.mouse(this);
+      diff = parseInt(Session.get("size")) / 2;
+      coordinates[0] -= diff;
+      coordinates[1] -= diff;
       if (! Session.get("cursor")|| !Cursor.findOne(Session.get("cursor")))
         createNewCursor(coordinates);
       Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});

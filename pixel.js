@@ -105,6 +105,7 @@ if (Meteor.isClient) {
         y: coordinates[1]}));
   }
   function click(coordinates){
+    lastClick = coordinates;
     Pixel.insert({
       whiteboard_id: Session.get("whiteboard_id"),
               color: Session.get("color"),
@@ -187,6 +188,8 @@ if (Meteor.isClient) {
       });
   }, 10000);
 
+  var mouseDown = false;
+  var lastClick = [0,0];
   Meteor.startup(function () {
     Session.set('user_id', Meteor.uuid());
     Session.set("size", 32);
@@ -198,6 +201,7 @@ if (Meteor.isClient) {
       if (! Session.get("cursor")|| !Cursor.findOne(Session.get("cursor")))
         createNewCursor(coordinates);
       Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
+
     });
     
     if((navigator.userAgent.match(/iP(hone|[ao]d)/i)) )
@@ -208,6 +212,27 @@ if (Meteor.isClient) {
     } else{
       d3.select('.screen').on('mousedown', function(){
         click(coordinates);
+        mouseDown = true;
+      });
+      d3.select('.screen').on('mousemove', function() {
+        coordinates = d3.mouse(this);
+        if (mouseDown){
+         var size = parseInt(Session.get("size")) / 2;
+         if ( Math.abs(coordinates[0]-lastClick[0]) > size){
+           if ( Math.abs(coordinates[1]-lastClick[1]) < size ) {
+             coordinates[1] = lastClick[1];
+           }
+           click(coordinates);
+         } else if ( Math.abs(coordinates[1]-lastClick[1]) > size ) {
+           if ( Math.abs(coordinates[0]-lastClick[0]) < size){
+             coordinates[0]= lastClick[0];
+           }
+           click(coordinates);
+         }
+        }
+      });
+      d3.select('.screen').on('mouseup', function(){
+        mouseDown = false;
       });
     }
 

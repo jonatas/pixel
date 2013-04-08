@@ -11,20 +11,20 @@
   <div class="loginButtons">
     {{loginButtons align="right"}}
   </div>
-  {{#if loading}}
-    <div class="loading">Loading...</div>
-  {{else}}
     <div class="screen"> {{> screen }}</div>
-  {{/if}}
   {{> painters }}
 </body>
 <template name="screen">
-  {{#each cursors}}
+  {{#if loading}}
+    <div class="loading">Loading...</div>
+  {{else}}
+    {{#each cursors}}
     {{> cursor}}
-  {{/each}}
-  {{#each draws }}
+    {{/each}}
+    {{#each draws }}
     {{> draw }}
-  {{/each}}
+    {{/each}}
+  {{/if}}
 </template>
 <template name="pallete">
 <input class="color" />

@@ -5,6 +5,7 @@ Whiteboard = new Meteor.Collection("whiteboards");
 var coordinates = [0,0];
 if (Meteor.isClient) {
   PalleteSizes = [];
+  var startTime = null;
   for (i = 0; i< 6;i++){
     PalleteSizes[i] = { size: 2+Math.pow(2,i)};
   }
@@ -51,10 +52,15 @@ if (Meteor.isClient) {
     setWhiteboardId(whiteboard_id);
     return whiteboard_id;
   }
+  var handlePixels = null;
   Deps.autorun(function(){
      Meteor.subscribe('whiteboards', Session.get("user_id"));
-     Meteor.subscribe('cursors', Session.get("whiteboard_id"));
-     Meteor.subscribe('pixels', Session.get("whiteboard_id"));
+     if (Session.get("whiteboard_id")){
+       Meteor.subscribe('cursors', Session.get("whiteboard_id"));
+       handlePixels = Meteor.subscribe('pixels', Session.get("whiteboard_id"))
+     } else {
+       handlePixels = null;
+     }
   });
   Meteor.autorun(function () {
     if (Meteor.userId()) {
@@ -127,6 +133,9 @@ if (Meteor.isClient) {
   Template.screen.draws = function() {
     return Pixel.find();
   };
+  Template.screen.loading = function() {
+    return !Session.get("whiteboard_id") || handlePixels && !handlePixels.ready();
+  };
   Template.painters.painters = function() {
     return Cursor.find( {last_click_at: {$gt: parseInt(Session.get('time')) - 600000}});
   };
@@ -192,7 +201,7 @@ if (Meteor.isClient) {
     Cursor.find({last_click_at: {$lt: new Date().getTime() - 60000}}).forEach(function(cursor){
       Cursor.remove(cursor._id);
       });
-  }, 10000);
+  }, 1000);
 
   var mouseDown = false;
   var lastClick = [0,0];
@@ -212,6 +221,8 @@ if (Meteor.isClient) {
     setInterval(function () {
                  Meteor.call("getServerTime", function (error, result) {
                     Session.set("time", result);
+                    if (! startTime)
+                      startTime = result;
                 });
                 }, 1000);
     if((navigator.userAgent.match(/iP(hone|[ao]d)/i)) ) {
@@ -244,7 +255,6 @@ if (Meteor.isClient) {
         mouseDown = false;
       });
     }
-
      findOrCreatePublicWhiteboardId();
   });
   /*
@@ -270,22 +280,30 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  Meteor.publish('cursors', function (whiteboard_id) {
-    return Cursor.find({whiteboard_id: whiteboard_id});
-  });
-  Meteor.publish('whiteboards', function (user_id) {
-    return Whiteboard.find({$or: [{user_id: user_id}, { name: "Public"}]});
-  });
-  Meteor.publish('pixels', function (whiteboard_id) {
-    return Pixel.find({whiteboard_id: whiteboard_id});
-  });
-
   Meteor.startup(function () {
+    Meteor.publish('cursors', function (whiteboard_id) {
+      return Cursor.find({whiteboard_id: whiteboard_id});
+    });
+    Meteor.publish('whiteboards', function (user_id) {
+      return Whiteboard.find({$or: [{user_id: user_id}, { name: "Public"}]});
+    });
+    Meteor.publish('pixels', function (whiteboard_id) {
+      if (! whiteboard_id)
+        return null;
+     var res = Pixel.find({whiteboard_id: whiteboard_id});
+      console.log("pixels for :"+whiteboard_id, res.count());
+      return  res;
+    });
     // code to run on server at startup
   });
   Meteor.methods({
     getServerTime: function () {
       return new Date().getTime();
+    },
+    cleanWhiteboard: function(whiteboard_id) {
+      Pixel.find({whiteboard_id: whiteboard_id}).forEach(function(pixel){
+       Pixel.remove(pixel._id);
+      });
     }
   });
 }

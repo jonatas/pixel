@@ -199,12 +199,17 @@ if (Meteor.isClient) {
         createNewCursor(coordinates);
       Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
     });
-    d3.select('.screen').on('mousedown', function(){
-      click(coordinates);
-    });
-    d3.select('.screen').on('touchstart', function(){
-      click(coordinates);
-    });
+    
+    if((navigator.userAgent.match(/iP(hone|[ao]d)/i)) )
+    {
+      d3.select('.screen').on('touchstart', function(){
+        click(coordinates);
+      });
+    } else{
+      d3.select('.screen').on('mousedown', function(){
+        click(coordinates);
+      });
+    }
 
      findOrCreatePublicWhiteboardId();
   });

@@ -35,7 +35,7 @@ if (Meteor.isClient) {
       whiteboard_id = Whiteboard.insert(where);
     }
     Session.set("public_whiteboard_id", whiteboard_id);
-    setWhiteboardId(whiteboard_id);
+    window.location.hash = whiteboard_id;
     return whiteboard_id;
   }
   function findOrCreateWhiteboardByName(name){
@@ -49,7 +49,7 @@ if (Meteor.isClient) {
       fields.year = d.getFullYear();
       whiteboard_id = Whiteboard.insert(fields);
     } else whiteboard_id = whiteboard._id;
-    setWhiteboardId(whiteboard_id);
+    window.location.hash = whiteboard_id;
     return whiteboard_id;
   }
   var handlePixels = null;
@@ -82,17 +82,16 @@ if (Meteor.isClient) {
         });
       }
     }
+    if (window.onhashchange!=undefined) 
+      window.onhashchange();
     if (! Session.get("whiteboard_id"))
       findOrCreatePublicWhiteboardId();
+
   });
   function setColorForCursor(color)
   {
     Session.set("color",color);
     Cursor.update(Session.get("cursor"), {$set: {color: color}});
-  }
-  function setWhiteboardId(id){
-     Session.set("whiteboard_id", id);
-     createNewCursor([0,0]);
   }
   function createNewCursor(coordinates){
     if (Session.get("cursor")){
@@ -178,7 +177,7 @@ if (Meteor.isClient) {
           findOrCreateWhiteboardByName(name);
         }
        },'click .whiteboard-name' : function(){
-         setWhiteboardId(this._id);
+          window.location.hash = this._id;
        }
       }
   );
@@ -259,6 +258,12 @@ if (Meteor.isClient) {
       });
     }
      findOrCreatePublicWhiteboardId();
+     window.onhashchange = function(){
+       if (window.location.hash.length > 0 &&  Session.get("whiteboard_id") != window.location.hash) {
+         console.log("whiteboard_id", window.location.hash );
+         Session.set("whiteboard_id", window.location.hash );
+       }
+     }
   });
   /*
      var PixelRouter = Backbone.Router.extend({

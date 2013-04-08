@@ -184,6 +184,10 @@ if (Meteor.isClient) {
          })();
     }
   }
+  Template.cursor.cssClass = function(){
+    return this._id == Session.get("cursor") ? "current" : "others";
+  }
+ 
   Meteor.setInterval(function(){
     Cursor.find({last_click_at: {$lt: new Date().getTime() - 60000}}).forEach(function(cursor){
       Cursor.remove(cursor._id);

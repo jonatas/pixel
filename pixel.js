@@ -199,7 +199,10 @@ if (Meteor.isClient) {
         createNewCursor(coordinates);
       Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
     });
-    d3.select('.screen').on('click', function(){
+    d3.select('.screen').on('mousedown', function(){
+      click(coordinates);
+    });
+    d3.select('.screen').on('touchstart', function(){
       click(coordinates);
     });
 

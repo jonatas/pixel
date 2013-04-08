@@ -24,10 +24,6 @@
   display: block;
   clear:both;
 }
-.pallete{
-  position: absolute;
-  right: 0;
-}
 .loading {
   font-size: 40px;
   position: absolute;

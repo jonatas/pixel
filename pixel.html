@@ -50,9 +50,11 @@
 </template>
 <template name="painters">
 <div class="painters">
-  Painters
+  <h3>Painters</h3>
   {{#each painters}}
-  <li class="painter-name">{{name}}</li>
+  <div class="painter-box">
+    <div class="painter-cursor" style="width:{{size}}px;background-color: {{color}}; height: {{size}}px;"></div><span class="painter-name">{{name}}</span>
+  </div>
   {{/each}}
 </div>
 </template>

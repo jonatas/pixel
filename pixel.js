@@ -101,6 +101,7 @@ if (Meteor.isClient) {
         name: Session.get("name"),
         color: Session.get("color"),
         size: Session.get("size"),
+        last_click_at: Session.get("time"),
         x: coordinates[0],
         y: coordinates[1]}));
   }
@@ -116,8 +117,9 @@ if (Meteor.isClient) {
    if (!Session.get("name") && Meteor.userId())
      Session.set("name",Meteor.users.findOne(Meteor.userId()).profile.name);
 
-    update = { last_click_at: new Date().getTime(), name: (Session.get("name")||"Anonymous")};
-    Cursor.update(Session.get("cursor"), {$set: update}); 
+    update = { last_click_at: Session.get('time'),
+                        name: (Session.get("name")||"Anonymous")};
+    Cursor.update(Session.get("cursor"), {$set: update});
   }
   Template.screen.cursors = function() {
     return Cursor.find();
@@ -126,7 +128,7 @@ if (Meteor.isClient) {
     return Pixel.find();
   };
   Template.painters.painters = function() {
-    return Cursor.find( {last_click_at: {$gt: new Date().getTime() - 10000}});
+    return Cursor.find( {last_click_at: {$gt: parseInt(Session.get('time')) - 600000}});
   };
   Template.whiteboards.mine = function(){
     return Whiteboard.find( {$or: [
@@ -203,9 +205,12 @@ if (Meteor.isClient) {
       Cursor.update(Session.get("cursor"), {$set: { x: coordinates[0], y: coordinates[1]}});
 
     });
-    
-    if((navigator.userAgent.match(/iP(hone|[ao]d)/i)) )
-    {
+    setInterval(function () {
+                 Meteor.call("getServerTime", function (error, result) {
+                    Session.set("time", result);
+                });
+                }, 1000);
+    if((navigator.userAgent.match(/iP(hone|[ao]d)/i)) ) {
       d3.select('.screen').on('touchstart', function(){
         click(coordinates);
       });
@@ -273,5 +278,10 @@ if (Meteor.isServer) {
 
   Meteor.startup(function () {
     // code to run on server at startup
+  });
+  Meteor.methods({
+    getServerTime: function () {
+      return new Date().getTime();
+    }
   });
 }

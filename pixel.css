@@ -17,6 +17,8 @@
 .painters {
   bottom:0;
   right: 0;
+  min-width: 200px;
+  min-height: 60px;
 
 }
 .size{
@@ -58,4 +60,15 @@
   border: 1px solid gray ;
   background-color: lightgray;
   padding: 10px;
+}
+.painter-cursor{
+float: left;
+}
+.painter-name{
+  vertical-align: middle;
+  white-space: nowrap;
+  margin: 5px;
+}
+.painter-box{
+  height: 32px;
 }

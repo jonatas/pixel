@@ -20,7 +20,7 @@ if (Meteor.isClient) {
     var d = new Date()
     var where = {
         name: "Public",
-         day: d.getDay(),
+         day: d.getDate(),
        month: d.getMonth()+1,
         year: d.getFullYear(),
      user_id: null };
@@ -75,10 +75,9 @@ if (Meteor.isClient) {
           Pixel.update(pixel._id, {$set: {user_id: Meteor.userId()}});
         });
       }
-    } else {
-      if (! Session.get("whiteboard_id"))
-        findOrCreatePublicWhiteboardId();
     }
+    if (! Session.get("whiteboard_id"))
+      findOrCreatePublicWhiteboardId();
   });
   function setColorForCursor(color)
   {

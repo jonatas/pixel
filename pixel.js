@@ -82,7 +82,7 @@ if (Meteor.isClient) {
         });
       }
     }
-    if (window.onhashchange!=undefined) 
+    if (window.onhashchange!=undefined)
       window.onhashchange();
     if (! Session.get("whiteboard_id"))
       findOrCreatePublicWhiteboardId();
@@ -259,9 +259,13 @@ if (Meteor.isClient) {
     }
      findOrCreatePublicWhiteboardId();
      window.onhashchange = function(){
-       if (window.location.hash.length > 0 &&  Session.get("whiteboard_id") != window.location.hash) {
-         console.log("whiteboard_id", window.location.hash );
-         Session.set("whiteboard_id", window.location.hash );
+        possible = window.location.hash.substring(1);
+       if (possible.length > 0 && Session.get("whiteboard_id") != possible){
+         Meteor.call('whiteboardExists', possible, function(err,res){
+         if (res == true){
+           Session.set("whiteboard_id", possible );
+           }
+         });
        }
      }
   });
@@ -312,6 +316,10 @@ if (Meteor.isServer) {
       Pixel.find({w: whiteboard_id}).forEach(function(pixel){
        Pixel.remove(pixel._id);
       });
+    },
+    whiteboardExists: function(whiteboard_id){
+      return Whiteboard.findOne(whiteboard_id) !=null;
     }
+
   });
 }

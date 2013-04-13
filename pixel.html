@@ -21,9 +21,6 @@
     {{#each cursors}}
     {{> cursor}}
     {{/each}}
-    {{#each draws }}
-    {{> draw }}
-    {{/each}}
   {{/if}}
 </template>
 <template name="pallete">
@@ -33,7 +30,9 @@
 <div class="cursor {{ cssClass }}" id="cursor_{{_id}}" style="width:{{size}}px;background-color: {{color}}; height: {{size}}px; top: {{y}}px; left: {{x}}px;" title="{{name}}" />
 </template>
 <template name="draw">
+{{#constant}}
 <div style="{{style}}" />
+{{/constant}}
 </template>
 <template name="sizes">
   {{#each sizes}}

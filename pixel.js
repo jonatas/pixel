@@ -210,6 +210,7 @@ if (Meteor.isClient) {
   Meteor.startup(function () {
     Session.set('user_id', Meteor.uuid());
     Session.set("size", 32);
+
     d3.select('html').on('mousemove', function() {
       coordinates = d3.mouse(this);
       diff = parseInt(Session.get("size")) / 2;
@@ -268,27 +269,15 @@ if (Meteor.isClient) {
          });
        }
      }
-  });
-  /*
-     var PixelRouter = Backbone.Router.extend({
-     routes: {
-     ":whiteboard_id": "main"
-     },
-     main: function (whiteboard_id) {
-     var oldList = Session.get("whiteboard_id");
-     if (whiteboard_id == null){
-     }
-     if (oldList !== whiteboard_id) {
-     Session.set("whiteboard_id", whiteboard_id);
-     }
-     },
-     setWhiteboard: function (whiteboard_id) {
-     this.navigate(whiteboard_id, true);
-     }
-     });
 
-     Router = new PixelRouter;
-     */
+    var frag = Meteor.renderList(
+        Pixel.find(),
+          function(pixel) {
+           return Template.draw(pixel);
+          }
+   );
+   document.body.appendChild(frag);
+  });
 }
 
 if (Meteor.isServer) {
